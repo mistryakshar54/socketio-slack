@@ -1,0 +1,25 @@
+{
+  "name": "slack-app",
+  "version": "1.0.0",
+  "description": "Slack App using Socket IO",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon -x ts-node src/index.ts",
+    "start:debug": "nodemon --inspect src/index.ts"
+  },
+  "author": "Akshar Mistry",
+  "license": "MIT",
+  "dependencies": {
+    "@types/express": "^4.17.6",
+    "@types/node": "^13.13.4",
+    "@types/socket.io": "^2.1.4",
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "nodemon": "^2.0.3",
+    "socket.io": "^2.3.0",
+    "ts-node": "^8.9.1",
+    "tslint": "^6.1.2",
+    "typescript": "^3.8.3"
+  }
+}

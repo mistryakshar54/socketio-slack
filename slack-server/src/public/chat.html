@@ -1,0 +1,35 @@
+<meta http-equiv="Content-Security-Policy"
+    content="default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'" />
+
+<script src="/socket.io/socket.io.js"></script>
+<script>    
+    const mainSocket = io.connect();
+    let namespaceList = [];
+    mainSocket.on('mainSocketMsg' , mainSocketMsg => {
+        console.log("Message from mainSocket" , mainSocketMsg)
+        if(mainSocketMsg.message.type === 'namespaceList'){
+            namespaceList=mainSocketMsg.message.data;
+            console.log("namespaceList:" , namespaceList); 
+            if(namespaceList.length > 0){
+                namespaceList.forEach( namespace => {    
+                    console.log("Connecting NS:" , namespace); 
+                    const NSSocket = io.connect(`/${namespace.name}`);
+                    NSSocket.on(`${namespace.name}NSMsg`, msg => {
+                        console.log("Msg from ${namespace.name} NS: ", msg);
+                    })
+                });
+                
+            }    
+        }
+    });
+    // const adobeSocket = io.connect('/adobe');
+    // adobeSocket.on('adobeNSMsg' , msg => {
+    //     console.log("Msg from Adobe NS: " , msg);
+    // })
+    
+    // const marketoSocket = io.connect('/marketo');
+    // marketoSocket.on('marketoNSMsg' , msg => {
+    //     console.log("Msg from Marketo NS: " , msg);
+    // })
+
+</script>
