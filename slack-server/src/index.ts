@@ -2,14 +2,17 @@ import express, { Request , Response , NextFunction } from 'express';
 import socketIo from 'socket.io';
 import NameSpace from './models/namespace';
 const NameSpaces : NameSpace[] = [
-  new NameSpace('marketo', '1234', [], ''),
-  new NameSpace('adobe', '1234', [], ''),
+  new NameSpace('wiki', '1234', ['artciles', 'news'], ''),
+  new NameSpace('gameing', '1234', ['pubg','cod','counter-strike'], ''),
 ];
 
 const app = express();
-console.log("__dirname", __dirname);
 app.use("/slack", (req : Request, res: Response) => {
   res.sendFile(__dirname + "/public/chat.html");
+});
+
+app.use("/slack2", (req : Request, res: Response) => {
+  res.sendFile(__dirname + "/public/chat2.html");
 });
 
 app.use('/', ( req: Request , res : Response ) => {
@@ -33,8 +36,6 @@ const getNamespaceList = () => {
 const io = socketIo(appInstance);
 
 io.on('connection', ( socket ) => {
-  console.log("Request to main socket connection.");
-  console.log("Sending NameSpace Lists");
   const namespaceList = getNamespaceList();
   socket.emit("mainSocketMsg", {
     message: {
@@ -47,6 +48,20 @@ io.on('connection', ( socket ) => {
 NameSpaces.forEach((ns) => {
   io.of(ns.name).on('connection' , ( socket ) => {
     console.log(`${socket.id} has joined namespace ${ns.name}`);
-    socket.emit(`${ns.name}NSMsg`, { message: `Connected to Namespace : ${ns.name}` });
+    socket.emit(`${ns.name}NSMsg`, { type:'connectHandshake', data:{rooms : ns.rooms}, message: `Connected to Namespace : ${ns.name}` });
+    socket.on(`${ns.name}NSClientMsg` , clientMsg => {
+      const { type , message, room } = clientMsg;
+      if(type === 'joinRoom'){
+        console.log(`Request from ${socket.id} to join room: ${room}`);
+        socket.join(`${room}`, (err) => {
+          io.of(`${ns.name}`)
+            .in(`${room}`)
+            .emit(`${ns.name}NSRoomMsg`, {
+              type: "connectHandshake",
+              message: `Room: ${room} connected!!`,
+            });
+        });
+      }
+    });
   });
 });
