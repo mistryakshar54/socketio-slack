@@ -1,35 +1,112 @@
 <meta http-equiv="Content-Security-Policy"
     content="default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'" />
+    <html>
+        <body>
+            <style>
+            .chatWindow{
+            background-color: white;
+            color: black;
+            display: flex;
+            height: 100%;
+            }
+            .roomPanel{
+                background-color: #331f56;
+                color: white;
+                width: 15%;
+            }
+            body{
+                padding: 0;
+                margin: 0;
+                position: relative;
+            }
+            #roomsList{ 
+                display: flex;
+                flex-direction: column;
+                padding: 5% 0%;
+                margin: 0;
+                width: 100%;
+             }
+            .roomBtn{
+                background-color: transparent;
+                color: white;
+                font-size: 1.2em;
+                font-weight: bold;
+                border: 0;
+                margin: 5% 0%;
+                cursor: pointer;
+            }
+            </style>
+        <div class="chatWindow">
+            <div class="roomPanel">
+                <ul id="roomsList">
+    
+                </ul>
+            </div>
+            <div class="chatPanel"></div>
+        </div>
+    </body>
+</html>
 
 <script src="/socket.io/socket.io.js"></script>
-<script>    
+<script>   
     const mainSocket = io.connect();
     let namespaceList = [];
+    let roomList = [];
+    let NSSocket;
+    let currentNamespace = "";
     mainSocket.on('mainSocketMsg' , mainSocketMsg => {
         console.log("Message from mainSocket" , mainSocketMsg)
         if(mainSocketMsg.message.type === 'namespaceList'){
             namespaceList=mainSocketMsg.message.data;
             console.log("namespaceList:" , namespaceList); 
             if(namespaceList.length > 0){
-                namespaceList.forEach( namespace => {    
-                    console.log("Connecting NS:" , namespace); 
-                    const NSSocket = io.connect(`/${namespace.name}`);
-                    NSSocket.on(`${namespace.name}NSMsg`, msg => {
-                        console.log("Msg from ${namespace.name} NS: ", msg);
-                    })
-                });
-                
+                joinNamespace(namespaceList[1].name);
             }    
         }
     });
-    // const adobeSocket = io.connect('/adobe');
-    // adobeSocket.on('adobeNSMsg' , msg => {
-    //     console.log("Msg from Adobe NS: " , msg);
-    // })
-    
-    // const marketoSocket = io.connect('/marketo');
-    // marketoSocket.on('marketoNSMsg' , msg => {
-    //     console.log("Msg from Marketo NS: " , msg);
-    // })
+    const joinNamespace = ( namespaceName ) => {
+        console.log("Request to join ", namespaceName);
+        const nsToJoin = namespaceList.filter((ns) => ns.name === namespaceName);
+        NSSocket = io.connect(`/${namespaceName}`);
+        console.log("Connecting to ", namespaceName, " namespace");
+        NSSocket.on(`${namespaceName}NSMsg`, msg => {
+            currentNamespace = namespaceName;
+            console.log("Msg from ${namespace.name} NS: ", msg);
+            if(msg.data && msg.data.rooms.length > 0){
+                roomList = msg.data.rooms;
+                console.log("Fetched Rooms: ", roomList);
+                generateRoomUI();
+            }
+        })
+    }
 
+    const generateRoomUI = () => {
+        const ulElem = document.getElementById('roomsList');
+        const roomBtns = roomList.map((room) => {
+            return `<button class='roomBtn' onclick='selectRoom("${room}")'>${room}</button>`;
+        });
+        ulElem.innerHTML = roomBtns.join('');
+    }
+
+    const selectRoom = ( roomName ) => {
+        if(NSSocket){
+            NSSocket.emit(`${currentNamespace}NSClientMsg`,
+            {
+                type : 'joinRoom',
+                message: "Wanna join the room",
+                room : roomName
+            });
+            NSSocket.on(`${currentNamespace}NSRoomMsg`, msg => {
+                if (msg.type === 'connectHandshake') {
+                    console.log("Msg from Room Server", msg.message);
+                }
+                else {
+                    console.log("Error connecting room ", msg);
+                }
+            });
+        }
+        else{
+            console.log("Undefined Namespace!!");
+        }
+    }
 </script>

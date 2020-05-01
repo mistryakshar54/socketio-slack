@@ -1,0 +1,15 @@
+.chatWindow{
+    background-color: darkslategrey;
+    color: white;
+    display: flex;
+}
+.roomPanel{
+    background-color: purple;
+    color: white;
+}
+body{
+    background-color: darkslategrey;
+}
+/* .roomsList{
+
+} */
