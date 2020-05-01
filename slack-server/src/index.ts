@@ -37,7 +37,7 @@ const io = socketIo(appInstance);
 
 io.on('connection', ( socket ) => {
   const namespaceList = getNamespaceList();
-  socket.emit("mainSocketMsg", {
+  socket.emit('mainSocketMsg', {
     message: {
       type: "namespaceList",
       data: namespaceList,
