@@ -12,12 +12,24 @@
             .roomPanel{
                 background-color: #331f56;
                 color: white;
-                width: 15%;
+                width: 12%;
+                display: flex;
+                align-items: center;
+                flex-direction: column;
+            }
+            .nsPanel{
+                background-color: #190e2b;
+                color: white;
+                display: flex;
+                align-items: center;
+                flex-direction: column;
+                width: 8%;
             }
             body{
                 padding: 0;
                 margin: 0;
                 position: relative;
+                font-family: "Source Sans Pro","Helvetica Neue",Helvetica,Arial,sans-serif;
             }
             #roomsList{ 
                 display: flex;
@@ -35,14 +47,84 @@
                 margin: 5% 0%;
                 cursor: pointer;
             }
+            #nsList{ 
+                display: flex;
+                flex-direction: column;
+                padding: 5% 0%;
+                margin: 0;
+                width: 100%;
+             }
+            .nsBtn{
+                background-color: transparent;
+                color: white;
+                font-size: 1.2em;
+                font-weight: bold;
+                border: 0;
+                margin: 5% 0%;
+                cursor: pointer;
+            }
+            .nsContent{
+                align-items: center;    
+                flex-direction: column;
+                display: flex;
+                margin: 20%;
+                cursor: pointer;
+            }
+            .nsContent > img { height: 30px; width: 30px; }
+            .chatPanel{
+                display: flex;
+                width: 100%;
+                flex-direction: column;
+            }
+            .msgWindow {height: 100%;}
+            #chatForm{ 
+                display: flex;
+                flex: 1 1 auto;
+                margin: 0.5%;
+                padding: 0;
+            }
+            #chatInput{  
+                flex: 1;
+                border-radius: 5px;
+                padding: 0.5% 0.5%;
+                border: 2px solid #6d6d6d;
+            }
+            #roomHeader { margin: 1%; }
+            /* .chatWindow{ height: 100%; } */
+            .chatContent { 
+                background-color: #331f56;
+                color: white;
+                border-radius: 5px;
+                margin: 1%;
+                padding: 0.7%;
+                width: 13%;
+                overflow-wrap: break-word;
+                flex-wrap: wrap;
+             }
             </style>
         <div class="chatWindow">
-            <div class="roomPanel">
-                <ul id="roomsList">
-    
-                </ul>
+            <div class="nsPanel">
+                <h4 id=""> Workspace </h1>
+                <ul id="nsList"></ul>
             </div>
-            <div class="chatPanel"></div>
+            <div class="roomPanel">
+                <h4 id=""> Rooms </h1>
+                <ul id="roomsList"></ul>
+            </div>
+            <div class="chatPanel">
+                <div class="msgWindow">
+                    <h1 id="roomHeader"> Room </h1>
+                    <div id="chatWindowPanel" class="chatWindowPanel">
+                        <div class="chatContent">This is a sample chat</div>
+                    </div>
+                </div>
+                <div class="chatFormDiv">
+                    <!-- <form id="chatForm"> -->
+                        <input type="text" id="chatInput" placeholder="Type Message Here.." value=""/>
+                        <button id="sendBtn" onclick="sendMessage()"> Send </button>
+                    <!-- </form> -->
+                </div>
+            </div>
         </div>
     </body>
 </html>
@@ -54,19 +136,33 @@
     let roomList = [];
     let NSSocket;
     let currentNamespace = "";
+    let currentRoom = "";
     mainSocket.on('mainSocketMsg' , mainSocketMsg => {
         console.log("Message from mainSocket" , mainSocketMsg)
         if(mainSocketMsg.message.type === 'namespaceList'){
             namespaceList=mainSocketMsg.message.data;
             console.log("namespaceList:" , namespaceList); 
             if(namespaceList.length > 0){
+                renderNameSpaces();
                 joinNamespace(namespaceList[1].name);
             }    
         }
     });
+    const renderNameSpaces = () => {
+        const ulElem = document.getElementById('nsList');
+        const nsBtns = namespaceList.map((namespace) => {
+            console.log(namespace);
+            return `
+            <div class="nsContent" onclick='joinNamespace("${namespace.name}")'>
+            <img src='${namespace.icon}' />
+            <button class='nsBtn'>${namespace.name}</button>
+            </div>`;
+        });
+        ulElem.innerHTML = nsBtns.join('');
+    }
     const joinNamespace = ( namespaceName ) => {
-        console.log("Request to join ", namespaceName);
         const nsToJoin = namespaceList.filter((ns) => ns.name === namespaceName);
+        if( NSSocket ) { console.log("Closing Socket for ", currentNamespace); NSSocket.close(); }
         NSSocket = io.connect(`/${namespaceName}`);
         console.log("Connecting to ", namespaceName, " namespace");
         NSSocket.on(`${namespaceName}NSMsg`, msg => {
@@ -76,6 +172,7 @@
                 roomList = msg.data.rooms;
                 console.log("Fetched Rooms: ", roomList);
                 generateRoomUI();
+                selectRoom( roomList[0] );
             }
         })
     }
@@ -83,30 +180,48 @@
     const generateRoomUI = () => {
         const ulElem = document.getElementById('roomsList');
         const roomBtns = roomList.map((room) => {
-            return `<button class='roomBtn' onclick='selectRoom("${room}")'>${room}</button>`;
+            return `<button class='roomBtn' onclick='selectRoom("${room}")'>#${room}</button>`;
         });
         ulElem.innerHTML = roomBtns.join('');
     }
 
     const selectRoom = ( roomName ) => {
-        if(NSSocket){
             NSSocket.emit(`${currentNamespace}NSClientMsg`,
             {
                 type : 'joinRoom',
                 message: "Wanna join the room",
                 room : roomName
+            }, (roomName , currentNoOfUsers) => {
+                currentRoom = roomName;
+                document.getElementById('roomHeader').innerHTML = `#${roomName}`;
+                console.log("Total users: " , currentNoOfUsers);
+                
             });
-            NSSocket.on(`${currentNamespace}NSRoomMsg`, msg => {
-                if (msg.type === 'connectHandshake') {
-                    console.log("Msg from Room Server", msg.message);
-                }
-                else {
-                    console.log("Error connecting room ", msg);
-                }
+            NSSocket.on(`RoomMsg`, msg => {
+            console.log("Got RoomChatMsg ,", msg);
+            if (msg.type === 'chatMsg') {
+                const msgHtml = `<div class="chatContent">${msg.message}</div>`;
+                document.getElementById('chatWindowPanel').innerHTML += msgHtml;
+
+                console.log("Msg from Room Server", msg.message);
+            }
+            else {
+                console.log("Error fetching message from room ", currentRoom);
+            }
+        });
+       
+    }
+
+    const sendMessage = () => {
+        const message = document.getElementById("chatInput").value;
+        console.log("sending message" , message);
+        if (NSSocket) {
+            NSSocket.emit(`roomChatMsg`,
+            {
+                type: 'sendRoomMessage',
+                message,
+                room: currentRoom
             });
-        }
-        else{
-            console.log("Undefined Namespace!!");
         }
     }
 </script>
