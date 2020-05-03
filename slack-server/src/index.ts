@@ -7,13 +7,22 @@ const NameSpaces: NameSpace[] = [
     'coding',
     '1234',
     ['JS', 'general'],
-    '/nsicons/code.png'
+    '/nsicons/code.png',
+    [
+      { roomName : 'JS', history:[]}, 
+      {roomName : 'general', history:[]}, 
+    ]
   ),
   new NameSpace(
     'gaming',
     '1234',
     ['pubg', 'cod', 'counter-strike'],
-    '/nsicons/game.png'
+    '/nsicons/game.png',
+    [
+      { roomName : 'pubg', history:[]}, 
+      {roomName : 'cod', history:[]}, 
+      {roomName : 'counter-strike', history:[]} 
+    ]
   ),
 ];
 
@@ -65,18 +74,35 @@ NameSpaces.forEach((ns) => {
       const { type , room, message } = clientMsg;
       if(type === 'joinRoom'){
         const roomToLeave = Object.keys(socket.rooms)[1];
-        socket.leave(roomToLeave);
-        socket.join(`${room}` , () => {
-          io.of(`${ns.name}`)
-            .in(`${room}`)
-            .clients( (err: any , clients: string | any[]) => {
-              ackCallback(room,clients.length);
-            });
-        });
+        socket.leave(roomToLeave , () => {
+          console.log('In leave room place', roomToLeave, 'for socker: ',socket.id);
+          console.log(socket.rooms);
+          socket.emit(
+            'historyUpdate',
+            ...ns.history.filter((historyObj) => historyObj.roomName === room)
+          );
+          socket.join(`${room}` , () => {
+            io.of(`${ns.name}`)
+              .in(`${room}`)
+              .clients( (err: any , clients: string | any[]) => {
+                ackCallback(room,clients.length);
+              });
+          });
+        }
+        );
       }
     });
+    // socket.on('fetchHistory' , roomName => {
+    //   socket.emit('historyUpdate' , ns.history.filter( historyObj => his ));
+    // });
     socket.on('roomChatMsg' , clientResp => {
         const { message , room } = clientResp;
+        ns.history.forEach( historyObj => {
+          if(historyObj.roomName === room){
+            historyObj.history.push(message);
+          }
+        });
+        console.log(ns.history);
         io.of(`${ns.name}`).to(`${room}`).emit('RoomMsg', {
           type: 'chatMsg',
           message,
