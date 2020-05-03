@@ -3,14 +3,26 @@ import express, { Request , Response } from 'express';
 import socketIo from 'socket.io';
 import NameSpace from './models/namespace';
 const NameSpaces: NameSpace[] = [
-  new NameSpace('wiki', '1234', ['artciles', 'news'], ''),
-  new NameSpace('gameing', '1234', ['pubg','cod','counter-strike'], ''),
+  new NameSpace(
+    'coding',
+    '1234',
+    ['JS', 'general'],
+    '/nsicons/code.png'
+  ),
+  new NameSpace(
+    'gaming',
+    '1234',
+    ['pubg', 'cod', 'counter-strike'],
+    '/nsicons/game.png'
+  ),
 ];
 
 const app = express();
 app.use('/slack', (req: Request, res: Response) => {
   res.sendFile(__dirname + '/public/chat.html');
 });
+
+app.use('/nsicons', express.static(__dirname + '/public'));
 
 app.use('/slack2', (req: Request, res: Response) => {
   res.sendFile(__dirname + '/public/chat2.html');
@@ -48,21 +60,27 @@ io.on('connection', ( socket ) => {
 
 NameSpaces.forEach((ns) => {
   io.of(ns.name).on('connection' , ( socket ) => {
-    console.log(`${socket.id} has joined namespace ${ns.name}`);
     socket.emit(`${ns.name}NSMsg`, { type:'connectHandshake', data:{rooms : ns.rooms}, message: `Connected to Namespace : ${ns.name}` });
-    socket.on(`${ns.name}NSClientMsg` , clientMsg => {
-      const { type , room } = clientMsg;
+    socket.on(`${ns.name}NSClientMsg` , (clientMsg, ackCallback ) => {
+      const { type , room, message } = clientMsg;
       if(type === 'joinRoom'){
-        console.log(`Request from ${socket.id} to join room: ${room}`);
-        socket.join(`${room}`, () => {
+        const roomToLeave = Object.keys(socket.rooms)[1];
+        socket.leave(roomToLeave);
+        socket.join(`${room}` , () => {
           io.of(`${ns.name}`)
             .in(`${room}`)
-            .emit(`${ns.name}NSRoomMsg`, {
-              type: 'connectHandshake',
-              message: `Room: ${room} connected!!`,
+            .clients( (err: any , clients: string | any[]) => {
+              ackCallback(room,clients.length);
             });
         });
       }
+    });
+    socket.on('roomChatMsg' , clientResp => {
+        const { message , room } = clientResp;
+        io.of(`${ns.name}`).to(`${room}`).emit('RoomMsg', {
+          type: 'chatMsg',
+          message,
+        });
     });
   });
 });
