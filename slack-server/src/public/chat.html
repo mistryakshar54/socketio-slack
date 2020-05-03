@@ -115,14 +115,14 @@
                 <div class="msgWindow">
                     <h1 id="roomHeader"> Room </h1>
                     <div id="chatWindowPanel" class="chatWindowPanel">
-                        <div class="chatContent">This is a sample chat</div>
+                        <!-- <div class="chatContent">This is a sample chat</div> -->
                     </div>
                 </div>
                 <div class="chatFormDiv">
-                    <!-- <form id="chatForm"> -->
+                    <form id="chatForm" onsubmit="return false;" >
                         <input type="text" id="chatInput" placeholder="Type Message Here.." value=""/>
                         <button id="sendBtn" onclick="sendMessage()"> Send </button>
-                    <!-- </form> -->
+                    </form>
                 </div>
             </div>
         </div>
@@ -185,7 +185,12 @@
         ulElem.innerHTML = roomBtns.join('');
     }
 
+    // const switchRooms = ( newRoom , oldRoom ) => {
+    //      NSSocket.emit(`leaveRoom`, currentRoom);
+    // }
     const selectRoom = ( roomName ) => {
+            if (currentRoom !== "") { NSSocket.close(); }
+            NSSocket = io.connect(`/${currentNamespace}`);
             NSSocket.emit(`${currentNamespace}NSClientMsg`,
             {
                 type : 'joinRoom',
@@ -197,8 +202,23 @@
                 console.log("Total users: " , currentNoOfUsers);
                 
             });
+            // NSSocket.emit('fetchHistory' , roomName);
+            NSSocket.on(`historyUpdate`, roomHistory => {
+                console.log("History Update: ", roomHistory);
+                const chatHistory = roomHistory.history;
+                if(chatHistory.length > 0 ){
+                    let msgHtml = "";
+                    chatHistory.forEach(chat => {
+                        msgHtml += `<div class="chatContent">${chat}</div>`;
+                    });
+                    document.getElementById('chatWindowPanel').innerHTML = msgHtml;
+                }
+                else{
+                    document.getElementById('chatWindowPanel').innerHTML = "";
+                }
+            });
             NSSocket.on(`RoomMsg`, msg => {
-            console.log("Got RoomChatMsg ,", msg);
+            console.log("Got RoomChatMsg ,", msg, Date.now());
             if (msg.type === 'chatMsg') {
                 const msgHtml = `<div class="chatContent">${msg.message}</div>`;
                 document.getElementById('chatWindowPanel').innerHTML += msgHtml;
