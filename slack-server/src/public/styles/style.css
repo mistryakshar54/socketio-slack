@@ -1,0 +1,138 @@
+.chatWindow {
+  background-color: white;
+  color: black;
+  display: flex;
+  height: 100%;
+}
+.sidePanel {
+  display: flex;
+  flex: 1 1 auto;
+}
+.roomPanel {
+  background-color: #331f56;
+  color: white;
+  display: flex;
+  flex: 3 auto;
+  align-items: center;
+  flex-direction: column;
+}
+.nsPanel {
+  background-color: #190e2b;
+  color: white;
+  display: flex;
+  flex: 1 auto;
+  align-items: center;
+  flex-direction: column;
+}
+body {
+  padding: 0;
+  margin: 0;
+  position: relative;
+  font-family: "Source Sans Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+#roomsList {
+  display: flex;
+  flex-direction: column;
+  padding: 5% 0%;
+  margin: 0;
+  width: 100%;
+}
+.roomBtn {
+  background-color: transparent;
+  color: white;
+  font-size: 1.2em;
+  font-weight: bold;
+  border: 0;
+  padding: 5% 0%;
+  cursor: pointer;
+}
+.activeRoom {
+  background-color: black;
+}
+.activeNS {
+  border-bottom: 5px solid white!important;
+}
+#nsList {
+  display: flex;
+  flex-direction: column;
+  padding: 5% 0%;
+  margin: 0;
+  width: 100%;
+}
+.nsBtn {
+  background-color: transparent;
+  color: white;
+  font-size: 1.2em;
+  font-weight: bold;
+  border: 0;
+  margin: 5% 0%;
+  cursor: pointer;
+}
+.nsContent {
+  align-items: center;
+  flex-direction: column;
+  display: flex;
+  margin: 20%;
+  cursor: pointer;
+}
+.nsContent > img {
+  height: 30px;
+  width: 30px;
+}
+.chatPanel {
+  display: flex;
+  width: 100%;
+  flex: 6;
+  flex-direction: column;
+}
+.msgWindow {
+  height: 100%;
+  overflow-y: scroll;
+}
+.msgPanel{
+  display: flex;
+  max-height: 100vh;
+  flex-direction: column;
+}
+.chatWindowPanel { min-height: 100vh;}
+#chatForm {
+  display: flex;
+  flex: 1 1 auto;
+  margin: 0.5%;
+  padding: 0;
+}
+#chatInput {
+  flex: 1;
+  border-radius: 5px;
+  margin: 0.2%;
+  padding: 1% 1%;
+  border: 2px solid #6d6d6d;
+}
+#roomHeader {
+  margin: 0% 0%;
+  padding: 0.5% 1%;
+  box-shadow: 1px 1px 3px #949494;
+}
+.chatContent {
+  background-color: #331f56;
+  color: white;
+  border-radius: 5px;
+  margin: 1%;
+  padding: 0.7%;
+  width: 13%;
+  overflow-wrap: break-word;
+  flex-wrap: wrap;
+}
+.greyText {
+  color: #9e9e9e;
+  text-align: center;
+}
+#sendBtn{
+  margin: 0.2% 1.5%;
+  padding: 1%;
+  background-color: #190f2b;
+  color: white;
+  border: 0px;
+  font-size: 1em;
+  border-radius: 5px;
+}

@@ -2,127 +2,33 @@
     content="default-src *; style-src 'self' http://* 'unsafe-inline'; script-src 'self' http://* 'unsafe-inline' 'unsafe-eval'" />
     <html>
         <body>
-            <style>
-            .chatWindow{
-            background-color: white;
-            color: black;
-            display: flex;
-            height: 100%;
-            }
-            .roomPanel{
-                background-color: #331f56;
-                color: white;
-                width: 12%;
-                display: flex;
-                align-items: center;
-                flex-direction: column;
-            }
-            .nsPanel{
-                background-color: #190e2b;
-                color: white;
-                display: flex;
-                align-items: center;
-                flex-direction: column;
-                width: 8%;
-            }
-            body{
-                padding: 0;
-                margin: 0;
-                position: relative;
-                font-family: "Source Sans Pro","Helvetica Neue",Helvetica,Arial,sans-serif;
-            }
-            #roomsList{ 
-                display: flex;
-                flex-direction: column;
-                padding: 5% 0%;
-                margin: 0;
-                width: 100%;
-             }
-            .roomBtn{
-                background-color: transparent;
-                color: white;
-                font-size: 1.2em;
-                font-weight: bold;
-                border: 0;
-                margin: 5% 0%;
-                cursor: pointer;
-            }
-            #nsList{ 
-                display: flex;
-                flex-direction: column;
-                padding: 5% 0%;
-                margin: 0;
-                width: 100%;
-             }
-            .nsBtn{
-                background-color: transparent;
-                color: white;
-                font-size: 1.2em;
-                font-weight: bold;
-                border: 0;
-                margin: 5% 0%;
-                cursor: pointer;
-            }
-            .nsContent{
-                align-items: center;    
-                flex-direction: column;
-                display: flex;
-                margin: 20%;
-                cursor: pointer;
-            }
-            .nsContent > img { height: 30px; width: 30px; }
-            .chatPanel{
-                display: flex;
-                width: 100%;
-                flex-direction: column;
-            }
-            .msgWindow {height: 100%;}
-            #chatForm{ 
-                display: flex;
-                flex: 1 1 auto;
-                margin: 0.5%;
-                padding: 0;
-            }
-            #chatInput{  
-                flex: 1;
-                border-radius: 5px;
-                padding: 0.5% 0.5%;
-                border: 2px solid #6d6d6d;
-            }
-            #roomHeader { margin: 1%; }
-            /* .chatWindow{ height: 100%; } */
-            .chatContent { 
-                background-color: #331f56;
-                color: white;
-                border-radius: 5px;
-                margin: 1%;
-                padding: 0.7%;
-                width: 13%;
-                overflow-wrap: break-word;
-                flex-wrap: wrap;
-             }
-            </style>
+            <link rel="stylesheet" type="text/css" href="styles/style.css" />
         <div class="chatWindow">
-            <div class="nsPanel">
-                <h4 id=""> Workspace </h1>
-                <ul id="nsList"></ul>
-            </div>
-            <div class="roomPanel">
-                <h4 id=""> Rooms </h1>
-                <ul id="roomsList"></ul>
+            <div class="sidePanel" >
+                <div class="nsPanel">
+                    <h4 id=""> Workspace </h1>
+                    <ul id="nsList"></ul>
+                </div>
+                <div class="roomPanel">
+                    <h4 id=""> Rooms </h1>
+                    <ul id="roomsList"></ul>
+                </div>
             </div>
             <div class="chatPanel">
-                <div class="msgWindow">
+                <div class="msgPanel">
                     <h1 id="roomHeader"> Room </h1>
-                    <div id="chatWindowPanel" class="chatWindowPanel">
-                        <!-- <div class="chatContent">This is a sample chat</div> -->
+                    <div class="msgWindow">
+                        <div id="chatWindowPanel" class="chatWindowPanel">
+                            <h1 class='greyText'>No content here :(</h1>
+                            <h3 class='greyText'>But you can always initiate a chat....</h3>
+                        </div>
                     </div>
-                </div>
-                <div class="chatFormDiv">
-                    <form id="chatForm" onsubmit="return false;" >
-                        <input type="text" id="chatInput" placeholder="Type Message Here.." value=""/>
-                        <button id="sendBtn" onclick="sendMessage()"> Send </button>
-                    </form>
+                    <div class="chatFormDiv">
+                        <form id="chatForm" onsubmit="return false;" >
+                            <input type="text" id="chatInput" placeholder="Type Message Here.." value=""/>
+                            <button id="sendBtn" onclick="sendMessage()"> Send </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -155,22 +61,21 @@
             return `
             <div class="nsContent" onclick='joinNamespace("${namespace.name}")'>
             <img src='${namespace.icon}' />
-            <button class='nsBtn'>${namespace.name}</button>
+            <button id='${namespace.name}Btn' class='nsBtn'>${namespace.name}</button>
             </div>`;
         });
         ulElem.innerHTML = nsBtns.join('');
     }
     const joinNamespace = ( namespaceName ) => {
         const nsToJoin = namespaceList.filter((ns) => ns.name === namespaceName);
-        if( NSSocket ) { console.log("Closing Socket for ", currentNamespace); NSSocket.close(); }
+        if( NSSocket ) { console.log("Closing Socket for ", currentNamespace); NSSocket.close(); currentRoom = "";  }
         NSSocket = io.connect(`/${namespaceName}`);
-        console.log("Connecting to ", namespaceName, " namespace");
         NSSocket.on(`${namespaceName}NSMsg`, msg => {
+            if (currentNamespace !== "") { document.getElementById(`${currentNamespace}Btn`).classList.remove("activeNS"); }
             currentNamespace = namespaceName;
-            console.log("Msg from ${namespace.name} NS: ", msg);
+            document.getElementById(`${currentNamespace}Btn`).classList.add("activeNS");
             if(msg.data && msg.data.rooms.length > 0){
                 roomList = msg.data.rooms;
-                console.log("Fetched Rooms: ", roomList);
                 generateRoomUI();
                 selectRoom( roomList[0] );
             }
@@ -180,16 +85,13 @@
     const generateRoomUI = () => {
         const ulElem = document.getElementById('roomsList');
         const roomBtns = roomList.map((room) => {
-            return `<button class='roomBtn' onclick='selectRoom("${room}")'>#${room}</button>`;
+            return `<button class='roomBtn' id="${room}Btn" onclick='selectRoom("${room}")'>#${room}</button>`;
         });
         ulElem.innerHTML = roomBtns.join('');
     }
 
-    // const switchRooms = ( newRoom , oldRoom ) => {
-    //      NSSocket.emit(`leaveRoom`, currentRoom);
-    // }
     const selectRoom = ( roomName ) => {
-            if (currentRoom !== "") { NSSocket.close(); }
+            if (currentRoom !== "") { NSSocket.close();}
             NSSocket = io.connect(`/${currentNamespace}`);
             NSSocket.emit(`${currentNamespace}NSClientMsg`,
             {
@@ -197,12 +99,13 @@
                 message: "Wanna join the room",
                 room : roomName
             }, (roomName , currentNoOfUsers) => {
+                if(currentRoom !== ""){document.getElementById(`${currentRoom}Btn`).classList.remove("activeRoom");}
                 currentRoom = roomName;
                 document.getElementById('roomHeader').innerHTML = `#${roomName}`;
+                document.getElementById(`${currentRoom}Btn`).classList.add("activeRoom");
                 console.log("Total users: " , currentNoOfUsers);
                 
             });
-            // NSSocket.emit('fetchHistory' , roomName);
             NSSocket.on(`historyUpdate`, roomHistory => {
                 console.log("History Update: ", roomHistory);
                 const chatHistory = roomHistory.history;
@@ -214,7 +117,7 @@
                     document.getElementById('chatWindowPanel').innerHTML = msgHtml;
                 }
                 else{
-                    document.getElementById('chatWindowPanel').innerHTML = "";
+                    document.getElementById('chatWindowPanel').innerHTML = "<h1 class='greyText'>No content here :(</h1> <h3 class='greyText'> But you can always initiate a chat....</h3>";
                 }
             });
             NSSocket.on(`RoomMsg`, msg => {
