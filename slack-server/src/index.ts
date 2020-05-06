@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import express, { Request , Response } from 'express';
 import socketIo from 'socket.io';
 import NameSpace from './models/namespace';
@@ -31,11 +30,8 @@ app.use('/slack', (req: Request, res: Response) => {
   res.sendFile(__dirname + '/public/chat.html');
 });
 
-app.use('/nsicons', express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/public'));
 
-app.use('/slack2', (req: Request, res: Response) => {
-  res.sendFile(__dirname + '/public/chat2.html');
-});
 
 app.use('/', ( req: Request , res: Response ) => {
   res.send({message : 'Welcome!'});
@@ -50,7 +46,8 @@ const getNamespaceList = () => {
   return NameSpaces.map( (namespace: NameSpace) => {
     return {
       name : namespace.name,
-      icon : namespace.icon
+      icon : namespace.icon,
+      rooms : namespace.rooms
     };
   });
 };
@@ -75,8 +72,6 @@ NameSpaces.forEach((ns) => {
       if(type === 'joinRoom'){
         const roomToLeave = Object.keys(socket.rooms)[1];
         socket.leave(roomToLeave , () => {
-          console.log('In leave room place', roomToLeave, 'for socker: ',socket.id);
-          console.log(socket.rooms);
           socket.emit(
             'historyUpdate',
             ...ns.history.filter((historyObj) => historyObj.roomName === room)
@@ -92,9 +87,7 @@ NameSpaces.forEach((ns) => {
         );
       }
     });
-    // socket.on('fetchHistory' , roomName => {
-    //   socket.emit('historyUpdate' , ns.history.filter( historyObj => his ));
-    // });
+    
     socket.on('roomChatMsg' , clientResp => {
         const { message , room } = clientResp;
         ns.history.forEach( historyObj => {
