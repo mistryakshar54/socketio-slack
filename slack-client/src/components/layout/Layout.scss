@@ -1,0 +1,54 @@
+.mainComponent{
+  background-color: black;
+  color: white;
+  height: 100%;
+}
+.sidePanel{
+  display: flex;
+  flex: 1 1 auto;
+}
+.chatPanel {
+  display: flex;
+  width: 100%;
+  flex: 6;
+  flex-direction: column;
+}
+.nsPanel {
+  background-color: #190e2b;
+  color: white;
+  display: flex;
+  flex: 1 auto;
+  align-items: center;
+  flex-direction: column;
+}
+#nsList {
+  display: flex;
+  flex-direction: column;
+  padding: 5% 0%;
+  margin: 0;
+  width: 100%;
+}
+.roomPanel {
+  background-color: #331f56;
+  color: white;
+  display: flex;
+  flex: 3 auto;
+  align-items: center;
+  flex-direction: column;
+}
+#roomsList {
+  display: flex;
+  flex-direction: column;
+  padding: 5% 0%;
+  margin: 0;
+  width: 100%;
+}
+.nsBtn {
+  background-color: transparent;
+  color: white;
+  font-size: 1.2em;
+  font-weight: bold;
+  border: 0;
+  margin: 5% 0%;
+  cursor: pointer;
+}

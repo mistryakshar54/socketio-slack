@@ -1,5 +1,9 @@
 import React, { Component } from 'react';
 import io from 'socket.io-client';
+import "./Layout.scss"
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
 class LayoutComponent extends Component {
   state = {
     namespaceList: [
@@ -110,49 +114,84 @@ class LayoutComponent extends Component {
 
   render() {
     return (
-      <div style={{ display: "flex" }}>
-        <div>
-          <h1>Namespaces</h1>
-          {this.state.namespaceList.length > 0 &&
-            this.state.namespaceList.map((namespace, index) => {
-              return (
-                <button
-                  key={namespace.name + index}
-                  id={namespace.name}
-                  className="nsBtn"
-                  onClick={() => this.joinNamespace(namespace.name)}
-                >
-                  {namespace.name}
-                </button>
-              );
-            })}
-        </div>
-        <div>
-          <h1>Rooms</h1>
-          {this.state.currentNS?.rooms?.length > 0 && this.renderRoomList()}
-        </div>
-        <div>
-          <h1>{this.state.currentRoom?.room}</h1>
-          <div>
-            {this.state.currentRoom?.history?.length > 0 &&
-              this.state.currentRoom.history.map((chatMsg, index) => {
-                return <div key={index}>{chatMsg}</div>;
+      <div className="row mainComponent">
+          <Col className="sidePanel" lg="2">
+            <div className="nsPanel">
+             <h4> Workspace </h4>
+             {this.state.namespaceList.length > 0 &&
+              this.state.namespaceList.map((namespace, index) => {
+                return (
+                  <button
+                    key={namespace.name + index}
+                    id={namespace.name}
+                    className="nsBtn"
+                    onClick={() => this.joinNamespace(namespace.name)}
+                  >
+                    {namespace.name}
+                  </button>
+                );
               })}
           </div>
-          <div>
-            <input
-              type="text"
-              id="chatInput"
-              placeholder="Type Message Here.."
-              onChange={this.onChatMsgChange}
-              value={this.state.chatMsgVal}
-            />
-            <button id="sendBtn" onClick={ this.sendMessage }>
-              Send
-            </button>
-          </div>
-        </div>
+          </Col>
+          <Col lg="2">Room</Col>
+          <Col>Chat</Col>
       </div>
+      // <div className="mainComponent">
+
+      //   <div className="sidePanel">
+      //     <div className="nsPanel">
+      //       <h4> Workspace </h4>
+      //       {this.state.namespaceList.length > 0 &&
+      //         this.state.namespaceList.map((namespace, index) => {
+      //           return (
+      //             <button
+      //               key={namespace.name + index}
+      //               id={namespace.name}
+      //               className="nsBtn"
+      //               onClick={() => this.joinNamespace(namespace.name)}
+      //             >
+      //               {namespace.name}
+      //             </button>
+      //           );
+      //         })}
+      //     </div>
+      //     <div className="roomPanel">
+      //       <h4> Rooms </h4>
+      //       {this.state.currentNS?.rooms?.length > 0 && this.renderRoomList()}
+      //     </div>
+      //   </div>
+      //   <div className="chatPanel"></div>
+      // </div>
+      //   <div className="chatPanel">
+
+      //   </div>
+
+      //   <div>
+      //     <h1>Rooms</h1>
+      //     {this.state.currentNS?.rooms?.length > 0 && this.renderRoomList()}
+      //   </div>
+      //   <div>
+      //     <h1>{this.state.currentRoom?.room}</h1>
+      //     <div>
+      //       {this.state.currentRoom?.history?.length > 0 &&
+      //         this.state.currentRoom.history.map((chatMsg, index) => {
+      //           return <div key={index}>{chatMsg}</div>;
+      //         })}
+      //     </div>
+      //     <div>
+      //       <input
+      //         type="text"
+      //         id="chatInput"
+      //         placeholder="Type Message Here.."
+      //         onChange={this.onChatMsgChange}
+      //         value={this.state.chatMsgVal}
+      //       />
+      //       <button id="sendBtn" onClick={this.sendMessage}>
+      //         Send
+      //       </button>
+      //     </div>
+      //   </div>
+      // </div>
     );
   }
 }
