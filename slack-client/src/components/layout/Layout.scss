@@ -1,11 +1,15 @@
 .mainComponent{
-  background-color: black;
-  color: white;
-  height: 100%;
+    background-color: black;
+    color: white;
+    margin: 0;
+    padding: 0;
+    height: 100%;
 }
 .sidePanel{
   display: flex;
   flex: 1 1 auto;
+  padding: 0;
+  background-color: black;
 }
 .chatPanel {
   display: flex;
@@ -14,12 +18,13 @@
   flex-direction: column;
 }
 .nsPanel {
-  background-color: #190e2b;
+  // background-color: #190e2b;
   color: white;
   display: flex;
   flex: 1 auto;
   align-items: center;
   flex-direction: column;
+  border-right: 1px solid #737373;
 }
 #nsList {
   display: flex;
@@ -29,12 +34,13 @@
   width: 100%;
 }
 .roomPanel {
-  background-color: #331f56;
+  // background-color: #331f56;
   color: white;
   display: flex;
   flex: 3 auto;
   align-items: center;
   flex-direction: column;
+  border-right: 1px solid #737373;
 }
 #roomsList {
   display: flex;
@@ -51,4 +57,57 @@
   border: 0;
   margin: 5% 0%;
   cursor: pointer;
+  :focus{
+    outline: 0;
+  }
+}
+.roomHeader{
+  margin: 0% 0%;
+  padding: 0.5% 1%;
+  box-shadow: 1px 1px 3px #949494;
+  color: white;
+}
+.msgWindow {
+  height: 100%;
+  overflow-y: scroll;
+}
+.chatPanel {
+  display: flex;
+  width: 100%;
+  flex: 6;
+  flex-direction: column;
+  padding: 0;
+  background-color: #171616;
+}
+.msgPanel{
+  display: flex;
+  max-height: 100vh;
+  flex-direction: column;
+}
+.chatWindowPanel { min-height: 100vh;}
+.greyText {
+  color: #9e9e9e;
+  text-align: center;
+}
+#chatInput {
+  flex: 1;
+  border-radius: 5px;
+  margin: 0.2%;
+  padding: 1% 1%;
+  border: 2px solid #6d6d6d;
+}
+.chatFormDiv{
+  display: flex;
+  flex: 1 1 auto;
+  margin: 0.5%;
+  padding: 0
+}
+#sendBtn{
+  margin: 0.2% 1.5%;
+  padding: 1%;
+  background-color: green;
+  color: white;
+  border: 0px;
+  font-size: 3em;
+  border-radius: 5px;
 }
