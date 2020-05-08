@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import io from 'socket.io-client';
 import "./Layout.scss"
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import Col from "react-bootstrap/Col";
 class LayoutComponent extends Component {
   state = {
@@ -115,10 +115,10 @@ class LayoutComponent extends Component {
   render() {
     return (
       <div className="row mainComponent">
-          <Col className="sidePanel" lg="2">
-            <div className="nsPanel">
-             <h4> Workspace </h4>
-             {this.state.namespaceList.length > 0 &&
+        <Col className="sidePanel" lg="3">
+          <div className="nsPanel col-lg-5">
+            <h4> Workspace </h4>
+            {this.state.namespaceList.length > 0 &&
               this.state.namespaceList.map((namespace, index) => {
                 return (
                   <button
@@ -132,9 +132,42 @@ class LayoutComponent extends Component {
                 );
               })}
           </div>
-          </Col>
-          <Col lg="2">Room</Col>
-          <Col>Chat</Col>
+          <div className="roomPanel">
+            <h4> Rooms </h4>
+            {this.state.currentNS?.rooms?.length > 0 && this.renderRoomList()}
+          </div>
+        </Col>
+        <Col className="chatPanel">
+          <div className="msgPanel">
+            <div className="roomHeader col-lg-12">
+              <h3>Room Name Here</h3>
+            </div>
+            <div className="msgWindow">
+              <div id="chatWindowPanel" className="chatWindowPanel">
+                <h1 className="greyText">No content here :(</h1>
+                <h3 className="greyText">
+                  But you can always initiate a chat....
+                </h3>
+              </div>
+            </div>
+            <div className="chatFormDiv">
+              <input
+                type="text"
+                id="chatInput"
+                placeholder="Type Message Here.."
+                onChange={this.onChatMsgChange}
+                value={this.state.chatMsgVal}
+              />
+              {/* <button id="sendBtn" onClick={this.sendMessage}> */}
+                <FontAwesomeIcon
+                  id="sendBtn"
+                  onClick={this.sendMessage}
+                  icon={faPaperPlane}
+                />
+              {/* </button> */}
+            </div>
+          </div>
+        </Col>
       </div>
       // <div className="mainComponent">
 
