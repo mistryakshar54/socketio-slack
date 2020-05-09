@@ -1,6 +1,10 @@
+type chatHistory = {
+  message: string;
+  user: string;
+}
 type roomHistory = {
     roomName: string;
-    history: string[];
+    history: string[] | chatHistory[];
 }
 class Namespace {
   constructor(

@@ -26,9 +26,6 @@ const NameSpaces: NameSpace[] = [
 ];
 
 const app = express();
-app.use('/slack', (req: Request, res: Response) => {
-  res.sendFile(__dirname + '/public/chat.html');
-});
 
 app.use(express.static(__dirname + '/public'));
 
@@ -72,10 +69,6 @@ NameSpaces.forEach((ns) => {
       if(type === 'joinRoom'){
         const roomToLeave = Object.keys(socket.rooms)[1];
         socket.leave(roomToLeave , () => {
-          // socket.emit(
-          //   'historyUpdate',
-          //   ...ns.history.filter((historyObj) => historyObj.roomName === room)
-          // );
           socket.removeAllListeners('RoomMsg');
           socket.join(`${room}` , () => {
             const historyData = ns.history.filter((historyObj) => historyObj.roomName === room);
