@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import io from 'socket.io-client';
 import "./Layout.scss"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { faPaperPlane, faCircle } from "@fortawesome/free-solid-svg-icons";
 import Col from "react-bootstrap/Col";
 import Media from 'react-bootstrap/Media';
 import {SOCKET_URL} from '../../constants';
@@ -102,7 +102,7 @@ class LayoutComponent extends Component {
   };
 
   renderRoomList = () => {
-    const { currentNS } = this.state;
+    const { currentNS, currentRoom } = this.state;
     return currentNS.rooms.map((room, index) => {
       return (
         <span
@@ -111,7 +111,7 @@ class LayoutComponent extends Component {
           className="nsBtn"
           onClick={() => this.joinRoom(room)}
         >
-          {room}
+          {"#" + room}
         </span>
       );
     });
@@ -123,6 +123,7 @@ class LayoutComponent extends Component {
       return (
         <div className="chatContent">
           {this.state.currentRoom.history.map((chatMsg, index) => {
+            const { message , user } = chatMsg;
             return (
               <Media key={index}>
                 <img
@@ -133,8 +134,8 @@ class LayoutComponent extends Component {
                   alt="User Image"
                 />
                 <Media.Body>
-                  <h5>Your Name</h5>
-                  <p>{chatMsg}</p>
+                  <h5>{user}</h5>
+                  <p>{message}</p>
                 </Media.Body>
               </Media>
             );
@@ -151,10 +152,14 @@ class LayoutComponent extends Component {
     }
   };
   sendMessage = () => {
-    const { chatMsgVal, currentRoom, NSSocket } = this.state;
+    const { chatMsgVal, currentUser, currentRoom, NSSocket } = this.state;
+    const chatMsg = {
+      message: chatMsgVal,
+      user: currentUser,
+    };
     NSSocket.emit(`roomChatMsg`, {
       type: "sendRoomMessage",
-      message: chatMsgVal,
+      message: chatMsg,
       room: currentRoom.room,
     });
     this.setState({ chatMsgVal: "" });
@@ -166,60 +171,73 @@ class LayoutComponent extends Component {
   render() {
     return (
       <div className="row mainComponent">
-        {this.state.currentUser ===""  &&<LoginPanel login={this.handleUserLogin} namespaceList={this.state.namespaceList} /> }
-        {this.state.currentUser !==""  &&
-        <>
-        <Col className="sidePanel" lg="3">
-          <div className="nsPanel col-lg-5">
-            {this.state.namespaceList.length > 0 &&
-              this.state.namespaceList.map((namespace, index) => {
-                return (
-                  <div
-                    className="nsContent"
-                    onClick={() => this.joinNamespace(namespace.name)}
-                    key={namespace.name + index}
-                  >
-                    <img src={this.state.serverUrl + namespace.icon} />
-                    <span id={namespace.name} className="nsBtn">
-                      {namespace.name}
-                    </span>
-                  </div>
-                );
-              })}
-          </div>
-          <div className="roomPanel">
-            <h4> Rooms </h4>
-            {this.state.currentNS?.rooms?.length > 0 && this.renderRoomList()}
-          </div>
-        </Col>
-        <Col className="chatPanel">
-          <div className="msgPanel">
-            <div className="roomHeader col-lg-12">
-              <h4>{this.state.currentRoom?.room}</h4>
-            </div>
-            <div className="msgWindow">
-              <div id="chatWindowPanel" className="chatWindowPanel">
-                {this.renderChatHistory()}
+        {this.state.currentUser === "" && (
+          <LoginPanel
+            login={this.handleUserLogin}
+            namespaceList={this.state.namespaceList}
+          />
+        )}
+        {this.state.currentUser !== "" && (
+          <>
+            <Col className="sidePanel" xl="3" lg="4" md="4" sm="5">
+              <div className="nsPanel col-lg-5">
+                {this.state.namespaceList.length > 0 &&
+                  this.state.namespaceList.map((namespace, index) => {
+                    return (
+                      <div
+                        className="nsContent"
+                        onClick={() => this.joinNamespace(namespace.name)}
+                        key={namespace.name + index}
+                      >
+                        <img src={this.state.serverUrl + namespace.icon} />
+                        <span id={namespace.name} className="nsBtn">
+                          {namespace.name}
+                        </span>
+                      </div>
+                    );
+                  })}
               </div>
-            </div>
-            <div className="chatFormDiv">
-              <input
-                type="text"
-                id="chatInput"
-                placeholder="Type Message Here.."
-                onChange={this.onChatMsgChange}
-                value={this.state.chatMsgVal}
-              />
-              <FontAwesomeIcon
-                id="sendBtn"
-                onClick={this.sendMessage}
-                icon={faPaperPlane}
-              />
-            </div>
-          </div>
-        </Col>
-        </>
-      }
+              <div className="roomPanel">
+                <h4 className="userHeader">
+                  {" "}
+                  {this.state.currentUser}{" "}
+                  <FontAwesomeIcon
+                    className="online"
+                    icon={faCircle}
+                  />{" "}
+                </h4>
+                {this.state.currentNS?.rooms?.length > 0 &&
+                  this.renderRoomList()}
+              </div>
+            </Col>
+            <Col className="chatPanel">
+              <div className="msgPanel">
+                <div className="roomHeader col-lg-12">
+                  <h4>#{this.state.currentRoom?.room}</h4>
+                </div>
+                <div className="msgWindow">
+                  <div id="chatWindowPanel" className="chatWindowPanel">
+                    {this.renderChatHistory()}
+                  </div>
+                </div>
+                <div className="chatFormDiv">
+                  <input
+                    type="text"
+                    id="chatInput"
+                    placeholder="Type Message Here.."
+                    onChange={this.onChatMsgChange}
+                    value={this.state.chatMsgVal}
+                  />
+                  <FontAwesomeIcon
+                    id="sendBtn"
+                    onClick={this.sendMessage}
+                    icon={faPaperPlane}
+                  />
+                </div>
+              </div>
+            </Col>
+          </>
+        )}
       </div>
     );
   }

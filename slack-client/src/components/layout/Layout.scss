@@ -21,7 +21,7 @@
 .nsPanel {
   color: white;
   display: flex;
-  flex: 1 auto;
+  flex: 0;
   align-items: center;
   flex-direction: column;
   border-right: 1px solid #737373;
@@ -38,8 +38,7 @@
   background-color: #0f1119;
   color: white;
   display: flex;
-  flex: 3 auto;
-  align-items: center;
+  flex: 2;
   flex-direction: column;
   border-right: 1px solid #737373;
 }
@@ -56,11 +55,8 @@
   font-size: 1.2em;
   font-weight: bold;
   border: 0;
-  margin: 5% 0%;
+  margin: 5% 10%;
   cursor: pointer;
-  :focus{
-    outline: 0;
-  }
 }
 .roomHeader{
   margin: 0% 0%;
@@ -133,5 +129,34 @@
   padding-top: 2%;
   .media{
     padding: 0.5% 1%;
+  }
+}
+.userHeader{
+  width: 100%;
+  padding: 5% 10%;
+}
+.online{
+    color: green;
+    font-size: 0.5em!important;
+    position: relative;
+    margin: 2%;
+}
+.activeRoom{
+  color: white;
+}
+.inActiveRoom{
+  color: #ffffff9c;
+}
+
+@media only screen and (max-width: 600px) {
+  .sidePanel {
+    position: absolute;
+    left: -1000px;
+    height: 100%;
+    z-index: 100;
+  }
+  .chatPanel{
+    position: absolute;
+    z-index: 10;
   }
 }
