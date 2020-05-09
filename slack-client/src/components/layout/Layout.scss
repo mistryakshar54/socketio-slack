@@ -16,15 +16,16 @@
   width: 100%;
   flex: 6;
   flex-direction: column;
+  background-color: #1b1d22;
 }
 .nsPanel {
-  // background-color: #190e2b;
   color: white;
   display: flex;
   flex: 1 auto;
   align-items: center;
   flex-direction: column;
   border-right: 1px solid #737373;
+  background-color: #0b0a0d;
 }
 #nsList {
   display: flex;
@@ -34,7 +35,7 @@
   width: 100%;
 }
 .roomPanel {
-  // background-color: #331f56;
+  background-color: #0f1119;
   color: white;
   display: flex;
   flex: 3 auto;
@@ -63,8 +64,9 @@
 }
 .roomHeader{
   margin: 0% 0%;
-  padding: 0.5% 1%;
-  box-shadow: 1px 1px 3px #949494;
+  padding: 1% 2%;
+  background-color: #0b0a0d;
+  border-bottom: 1px solid #949494;
   color: white;
 }
 .msgWindow {
@@ -95,6 +97,11 @@
   margin: 0.2%;
   padding: 1% 1%;
   border: 2px solid #6d6d6d;
+  background-color: transparent;
+  color: white;
+  ::placeholder {
+  color: white;
+  }
 }
 .chatFormDiv{
   display: flex;
@@ -105,9 +112,26 @@
 #sendBtn{
   margin: 0.2% 1.5%;
   padding: 1%;
-  background-color: green;
+  background-color: #3F51B5;
   color: white;
   border: 0px;
   font-size: 3em;
   border-radius: 5px;
+}
+.nsContent {
+  align-items: center;
+  flex-direction: column;
+  display: flex;
+  margin: 20%;
+  cursor: pointer;
+}
+.nsContent > img {
+  height: 30px;
+  width: 30px;
+}
+.chatContent{
+  padding-top: 2%;
+  .media{
+    padding: 0.5% 1%;
+  }
 }

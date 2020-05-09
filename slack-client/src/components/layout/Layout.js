@@ -4,8 +4,12 @@ import "./Layout.scss"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import Col from "react-bootstrap/Col";
+import Media from 'react-bootstrap/Media';
+import {SOCKET_URL} from '../../constants';
+import LoginPanel from '../loginPanel/loginPanel';
 class LayoutComponent extends Component {
   state = {
+    serverUrl: SOCKET_URL,
     namespaceList: [
       {
         name: "",
@@ -25,30 +29,37 @@ class LayoutComponent extends Component {
     },
     currentUsersInRoom: 0,
     chatMsgVal: "",
+    currentUser: "",
   };
   componentDidMount() {
-    const socket = io("http://localhost:4000/");
+    const socket = io(this.state.serverUrl);
     socket.on("mainSocketMsg", (mainSocketMsg) => {
       if (mainSocketMsg.message.type === "namespaceList") {
         this.setState({ namespaceList: mainSocketMsg.message.data });
+        this.joinNamespace(this.state.namespaceList[0].name);
+        socket.disconnect();
       }
     });
   }
 
   joinNamespace = (namespaceName) => {
-    const NSSocket = io.connect(`http://localhost:4000/${namespaceName}`);
-    NSSocket.on(`${namespaceName}NSMsg`, (msg) => {
+    const NSSocket = io.connect(`${this.state.serverUrl + namespaceName}`);
+    NSSocket.on(`NSMsg`, (msg) => {
       const selectedNS = this.state.namespaceList.filter(
         (ns) => ns.name === namespaceName
       );
       this.setState({ NSSocket, currentNS: selectedNS[0] });
+      this.joinRoom(selectedNS[0].rooms[0]);
     });
   };
 
   joinRoom = (roomName) => {
-    const { currentNS, NSSocket } = this.state;
+    let { currentNS, NSSocket } = this.state;
+    NSSocket.close();
+    NSSocket = io.connect(`${this.state.serverUrl + currentNS.name}`);
+    this.setState({ NSSocket });
     NSSocket.emit(
-      `${currentNS.name}NSClientMsg`,
+      `NSClientMsg`,
       {
         type: "joinRoom",
         message: "Wanna join the room",
@@ -88,18 +99,51 @@ class LayoutComponent extends Component {
     const { currentNS } = this.state;
     return currentNS.rooms.map((room, index) => {
       return (
-        <button
+        <span
           key={room + index}
           id={room + "Btn"}
           className="nsBtn"
           onClick={() => this.joinRoom(room)}
         >
           {room}
-        </button>
+        </span>
       );
     });
   };
 
+  renderChatHistory = () => {
+    const { currentRoom } = this.state;
+    if (currentRoom?.history?.length > 0) {
+      return (
+        <div className="chatContent">
+          {this.state.currentRoom.history.map((chatMsg, index) => {
+            return (
+              <Media key={index}>
+                <img
+                  width={50}
+                  height={50}
+                  className="mr-3"
+                  src={this.state.serverUrl + "/nsicons/user.png"}
+                  alt="User Image"
+                />
+                <Media.Body>
+                  <h5>Your Name</h5>
+                  <p>{chatMsg}</p>
+                </Media.Body>
+              </Media>
+            );
+          })}
+        </div>
+      );
+    } else {
+      return (
+        <div className="chatContent">
+          <h1 className="greyText">No content here :(</h1>
+          <h3 className="greyText">But you can always initiate a chat....</h3>
+        </div>
+      );
+    }
+  };
   sendMessage = () => {
     const { chatMsgVal, currentRoom, NSSocket } = this.state;
     NSSocket.emit(`roomChatMsg`, {
@@ -107,6 +151,7 @@ class LayoutComponent extends Component {
       message: chatMsgVal,
       room: currentRoom.room,
     });
+    this.setState({ chatMsgVal: "" });
   };
 
   onChatMsgChange = (event) =>
@@ -115,20 +160,22 @@ class LayoutComponent extends Component {
   render() {
     return (
       <div className="row mainComponent">
-        <Col className="sidePanel" lg="3">
+        <LoginPanel />
+        {/* <Col className="sidePanel" lg="3">
           <div className="nsPanel col-lg-5">
-            <h4> Workspace </h4>
             {this.state.namespaceList.length > 0 &&
               this.state.namespaceList.map((namespace, index) => {
                 return (
-                  <button
-                    key={namespace.name + index}
-                    id={namespace.name}
-                    className="nsBtn"
+                  <div
+                    className="nsContent"
                     onClick={() => this.joinNamespace(namespace.name)}
+                    key={namespace.name + index}
                   >
-                    {namespace.name}
-                  </button>
+                    <img src={this.state.serverUrl + namespace.icon} />
+                    <span id={namespace.name} className="nsBtn">
+                      {namespace.name}
+                    </span>
+                  </div>
                 );
               })}
           </div>
@@ -140,14 +187,11 @@ class LayoutComponent extends Component {
         <Col className="chatPanel">
           <div className="msgPanel">
             <div className="roomHeader col-lg-12">
-              <h3>Room Name Here</h3>
+              <h4>{this.state.currentRoom?.room}</h4>
             </div>
             <div className="msgWindow">
               <div id="chatWindowPanel" className="chatWindowPanel">
-                <h1 className="greyText">No content here :(</h1>
-                <h3 className="greyText">
-                  But you can always initiate a chat....
-                </h3>
+                {this.renderChatHistory()}
               </div>
             </div>
             <div className="chatFormDiv">
@@ -158,73 +202,15 @@ class LayoutComponent extends Component {
                 onChange={this.onChatMsgChange}
                 value={this.state.chatMsgVal}
               />
-              {/* <button id="sendBtn" onClick={this.sendMessage}> */}
-                <FontAwesomeIcon
-                  id="sendBtn"
-                  onClick={this.sendMessage}
-                  icon={faPaperPlane}
-                />
-              {/* </button> */}
+              <FontAwesomeIcon
+                id="sendBtn"
+                onClick={this.sendMessage}
+                icon={faPaperPlane}
+              />
             </div>
           </div>
-        </Col>
+        </Col> */}
       </div>
-      // <div className="mainComponent">
-
-      //   <div className="sidePanel">
-      //     <div className="nsPanel">
-      //       <h4> Workspace </h4>
-      //       {this.state.namespaceList.length > 0 &&
-      //         this.state.namespaceList.map((namespace, index) => {
-      //           return (
-      //             <button
-      //               key={namespace.name + index}
-      //               id={namespace.name}
-      //               className="nsBtn"
-      //               onClick={() => this.joinNamespace(namespace.name)}
-      //             >
-      //               {namespace.name}
-      //             </button>
-      //           );
-      //         })}
-      //     </div>
-      //     <div className="roomPanel">
-      //       <h4> Rooms </h4>
-      //       {this.state.currentNS?.rooms?.length > 0 && this.renderRoomList()}
-      //     </div>
-      //   </div>
-      //   <div className="chatPanel"></div>
-      // </div>
-      //   <div className="chatPanel">
-
-      //   </div>
-
-      //   <div>
-      //     <h1>Rooms</h1>
-      //     {this.state.currentNS?.rooms?.length > 0 && this.renderRoomList()}
-      //   </div>
-      //   <div>
-      //     <h1>{this.state.currentRoom?.room}</h1>
-      //     <div>
-      //       {this.state.currentRoom?.history?.length > 0 &&
-      //         this.state.currentRoom.history.map((chatMsg, index) => {
-      //           return <div key={index}>{chatMsg}</div>;
-      //         })}
-      //     </div>
-      //     <div>
-      //       <input
-      //         type="text"
-      //         id="chatInput"
-      //         placeholder="Type Message Here.."
-      //         onChange={this.onChatMsgChange}
-      //         value={this.state.chatMsgVal}
-      //       />
-      //       <button id="sendBtn" onClick={this.sendMessage}>
-      //         Send
-      //       </button>
-      //     </div>
-      //   </div>
-      // </div>
     );
   }
 }
