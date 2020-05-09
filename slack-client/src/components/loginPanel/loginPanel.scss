@@ -1,0 +1,35 @@
+.nameInput{
+    color: white;
+    background-color: transparent;
+    font-size: 2em;
+    border: 0;
+    border-bottom: 2px solid white;
+}
+.loginWindow
+{
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    display: flex;
+    top: 0;
+    bottom: 0;
+    > div{
+        margin: 2%;
+    }
+}
+.nsList{
+    display: flex;
+    flex-direction: column;
+    padding: 5%;
+    cursor: pointer;
+}
+.nsList > img {
+  height: 30px;
+  width: 30px;
+  margin: 0% 15%;
+}
+.nsListContainer{
+    display: flex;
+    justify-content: space-evenly;
+}

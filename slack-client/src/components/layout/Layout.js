@@ -36,12 +36,18 @@ class LayoutComponent extends Component {
     socket.on("mainSocketMsg", (mainSocketMsg) => {
       if (mainSocketMsg.message.type === "namespaceList") {
         this.setState({ namespaceList: mainSocketMsg.message.data });
-        this.joinNamespace(this.state.namespaceList[0].name);
+        // this.joinNamespace(this.state.namespaceList[0].name);
         socket.disconnect();
       }
     });
   }
-
+  handleUserLogin = ( name , namespaceToJoin ) => {
+    if(!name){ alert('Please enter name'); }
+    else{
+      this.setState({ currentUser : name});
+      this.joinNamespace(namespaceToJoin);
+    }
+  }
   joinNamespace = (namespaceName) => {
     const NSSocket = io.connect(`${this.state.serverUrl + namespaceName}`);
     NSSocket.on(`NSMsg`, (msg) => {
@@ -160,8 +166,10 @@ class LayoutComponent extends Component {
   render() {
     return (
       <div className="row mainComponent">
-        <LoginPanel />
-        {/* <Col className="sidePanel" lg="3">
+        {this.state.currentUser ===""  &&<LoginPanel login={this.handleUserLogin} namespaceList={this.state.namespaceList} /> }
+        {this.state.currentUser !==""  &&
+        <>
+        <Col className="sidePanel" lg="3">
           <div className="nsPanel col-lg-5">
             {this.state.namespaceList.length > 0 &&
               this.state.namespaceList.map((namespace, index) => {
@@ -209,7 +217,9 @@ class LayoutComponent extends Component {
               />
             </div>
           </div>
-        </Col> */}
+        </Col>
+        </>
+      }
       </div>
     );
   }
