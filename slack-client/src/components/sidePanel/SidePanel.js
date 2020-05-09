@@ -1,5 +1,7 @@
-import React, { Component } from "react";
+import React from 'react';
 
-class SidePanelComponent extends Component {}
+const SidePanelComponent = (props) => {
+    
+}
 
 export default SidePanelComponent;
