@@ -66,16 +66,17 @@ io.on('connection', ( socket ) => {
 
 NameSpaces.forEach((ns) => {
   io.of(ns.name).on('connection' , ( socket ) => {
-    socket.emit(`${ns.name}NSMsg`, { type:'connectHandshake', data:{rooms : ns.rooms}, message: `Connected to Namespace : ${ns.name}` });
-    socket.on(`${ns.name}NSClientMsg` , (clientMsg, ackCallback ) => {
+    socket.emit('NSMsg', { type:'connectHandshake', data:{rooms : ns.rooms}, message: `Connected to Namespace : ${ns.name}` });
+    socket.on('NSClientMsg' , (clientMsg, ackCallback ) => {
       const { type , room, message } = clientMsg;
       if(type === 'joinRoom'){
         const roomToLeave = Object.keys(socket.rooms)[1];
         socket.leave(roomToLeave , () => {
-          socket.emit(
-            'historyUpdate',
-            ...ns.history.filter((historyObj) => historyObj.roomName === room)
-          );
+          // socket.emit(
+          //   'historyUpdate',
+          //   ...ns.history.filter((historyObj) => historyObj.roomName === room)
+          // );
+          socket.removeAllListeners('RoomMsg');
           socket.join(`${room}` , () => {
             const historyData = ns.history.filter((historyObj) => historyObj.roomName === room);
             io.of(`${ns.name}`)
