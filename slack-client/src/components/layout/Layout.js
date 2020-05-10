@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import io from 'socket.io-client';
 import "./Layout.scss"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPaperPlane, faCircle } from "@fortawesome/free-solid-svg-icons";
+import { faPaperPlane, faCircle, faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
 import Col from "react-bootstrap/Col";
 import Media from 'react-bootstrap/Media';
 import {SOCKET_URL} from '../../constants';
@@ -30,24 +30,25 @@ class LayoutComponent extends Component {
     currentUsersInRoom: 0,
     chatMsgVal: "",
     currentUser: "",
+    sidePanelOpen: false,
   };
   componentDidMount() {
     const socket = io(this.state.serverUrl);
     socket.on("mainSocketMsg", (mainSocketMsg) => {
       if (mainSocketMsg.message.type === "namespaceList") {
         this.setState({ namespaceList: mainSocketMsg.message.data });
-        // this.joinNamespace(this.state.namespaceList[0].name);
         socket.disconnect();
       }
     });
   }
-  handleUserLogin = ( name , namespaceToJoin ) => {
-    if(!name){ alert('Please enter name'); }
-    else{
-      this.setState({ currentUser : name});
+  handleUserLogin = (name, namespaceToJoin) => {
+    if (!name) {
+      alert("Please enter name");
+    } else {
+      this.setState({ currentUser: name });
       this.joinNamespace(namespaceToJoin);
     }
-  }
+  };
   joinNamespace = (namespaceName) => {
     const NSSocket = io.connect(`${this.state.serverUrl + namespaceName}`);
     NSSocket.on(`NSMsg`, (msg) => {
@@ -80,15 +81,12 @@ class LayoutComponent extends Component {
             history: chatHistory.history,
           },
         });
-        console.log("Updated history:", this.state);
+        this.toggleSidePanel();
       }
     );
     NSSocket.on(`RoomMsg`, (msg) => {
-      console.log("Current Room still exists post callback!!:", roomName);
-      console.log("Got RoomChatMsg ,", msg, Date.now());
       const { currentRoom } = this.state;
       const chatHistory = currentRoom.history;
-      console.log("Got Msh: ", msg);
       if (msg.type === "chatMsg") {
         chatHistory.push(msg.message);
         this.setState({
@@ -102,7 +100,7 @@ class LayoutComponent extends Component {
   };
 
   renderRoomList = () => {
-    const { currentNS, currentRoom } = this.state;
+    const { currentNS } = this.state;
     return currentNS.rooms.map((room, index) => {
       return (
         <span
@@ -123,7 +121,7 @@ class LayoutComponent extends Component {
       return (
         <div className="chatContent">
           {this.state.currentRoom.history.map((chatMsg, index) => {
-            const { message , user } = chatMsg;
+            const { message, user } = chatMsg;
             return (
               <Media key={index}>
                 <img
@@ -131,7 +129,7 @@ class LayoutComponent extends Component {
                   height={50}
                   className="mr-3"
                   src={this.state.serverUrl + "/nsicons/user.png"}
-                  alt="User Image"
+                  alt={user + "'s profile'"}
                 />
                 <Media.Body>
                   <h5>{user}</h5>
@@ -165,6 +163,11 @@ class LayoutComponent extends Component {
     this.setState({ chatMsgVal: "" });
   };
 
+  toggleSidePanel = () => {
+    const { sidePanelOpen } = this.state;
+    this.setState({ sidePanelOpen : !(sidePanelOpen) });
+  };
+
   onChatMsgChange = (event) =>
     this.setState({ chatMsgVal: event.target.value });
 
@@ -179,7 +182,14 @@ class LayoutComponent extends Component {
         )}
         {this.state.currentUser !== "" && (
           <>
-            <Col className="sidePanel" xl="3" lg="4" md="4" sm="5">
+            <Col
+              style={{ zIndex: this.state.sidePanelOpen ? "100" : "0" }}
+              className="sidePanel"
+              xl="3"
+              lg="4"
+              md="4"
+              sm="5"
+            >
               <div className="nsPanel col-lg-5">
                 {this.state.namespaceList.length > 0 &&
                   this.state.namespaceList.map((namespace, index) => {
@@ -189,7 +199,7 @@ class LayoutComponent extends Component {
                         onClick={() => this.joinNamespace(namespace.name)}
                         key={namespace.name + index}
                       >
-                        <img src={this.state.serverUrl + namespace.icon} />
+                        <img alt="workspace icon" src={this.state.serverUrl + namespace.icon} />
                         <span id={namespace.name} className="nsBtn">
                           {namespace.name}
                         </span>
@@ -198,14 +208,17 @@ class LayoutComponent extends Component {
                   })}
               </div>
               <div className="roomPanel">
-                <h4 className="userHeader">
-                  {" "}
-                  {this.state.currentUser}{" "}
+                <div className="userHeader">
+                  <h4>
+                    {this.state.currentUser}
+                    <FontAwesomeIcon className="online" icon={faCircle} />
+                  </h4>
                   <FontAwesomeIcon
-                    className="online"
-                    icon={faCircle}
-                  />{" "}
-                </h4>
+                    className="cross"
+                    onClick={this.toggleSidePanel}
+                    icon={faTimes}
+                  />
+                </div>
                 {this.state.currentNS?.rooms?.length > 0 &&
                   this.renderRoomList()}
               </div>
@@ -214,6 +227,11 @@ class LayoutComponent extends Component {
               <div className="msgPanel">
                 <div className="roomHeader col-lg-12">
                   <h4>#{this.state.currentRoom?.room}</h4>
+                  <FontAwesomeIcon
+                    className="hamburger"
+                    onClick={this.toggleSidePanel}
+                    icon={faBars}
+                  />
                 </div>
                 <div className="msgWindow">
                   <div id="chatWindowPanel" className="chatWindowPanel">

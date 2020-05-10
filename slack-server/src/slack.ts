@@ -1,6 +1,8 @@
 import express, { Request , Response } from 'express';
 import socketIo from 'socket.io';
 import NameSpace from './models/namespace';
+import path from 'path';
+const PORT = process.env.PORT||4000;
 const NameSpaces: NameSpace[] = [
   new NameSpace(
     'coding',
@@ -29,14 +31,13 @@ const app = express();
 
 app.use(express.static(__dirname + '/public'));
 
-
-app.use('/', ( req: Request , res: Response ) => {
+app.use('/test', ( req: Request , res: Response ) => {
   res.send({message : 'Welcome!'});
 });
 
-const appInstance = app.listen(4000);
+const appInstance = app.listen(PORT);
 appInstance.on('listening' , () => {
-  console.log('Server listening on port: 4000');
+  console.log('Server listening on port: ', PORT);
 });
 
 const getNamespaceList = () => {
@@ -65,7 +66,7 @@ NameSpaces.forEach((ns) => {
   io.of(ns.name).on('connection' , ( socket ) => {
     socket.emit('NSMsg', { type:'connectHandshake', data:{rooms : ns.rooms}, message: `Connected to Namespace : ${ns.name}` });
     socket.on('NSClientMsg' , (clientMsg, ackCallback ) => {
-      const { type , room, message } = clientMsg;
+      const { type , room } = clientMsg;
       if(type === 'joinRoom'){
         const roomToLeave = Object.keys(socket.rooms)[1];
         socket.leave(roomToLeave , () => {
@@ -90,7 +91,6 @@ NameSpaces.forEach((ns) => {
             historyObj.history.push(message);
           }
         });
-        console.log(ns.history);
         io.of(`${ns.name}`).to(`${room}`).emit('RoomMsg', {
           type: 'chatMsg',
           message,

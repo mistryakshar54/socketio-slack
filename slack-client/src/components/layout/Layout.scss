@@ -64,6 +64,8 @@
   background-color: #0b0a0d;
   border-bottom: 1px solid #949494;
   color: white;
+  display: flex;
+  justify-content: space-between;
 }
 .msgWindow {
   height: 100%;
@@ -134,6 +136,11 @@
 .userHeader{
   width: 100%;
   padding: 5% 10%;
+  display: flex;
+  justify-content: space-between;
+  h4{
+    width: 100%;
+  }
 }
 .online{
     color: green;
@@ -148,15 +155,25 @@
   color: #ffffff9c;
 }
 
+.hamburger,.cross{
+  font-size: 2em;
+  visibility: hidden;
+}
+
 @media only screen and (max-width: 600px) {
   .sidePanel {
     position: absolute;
-    left: -1000px;
     height: 100%;
-    z-index: 100;
+    z-index: 10;
   }
   .chatPanel{
     position: absolute;
     z-index: 10;
+  }
+  .roomHeader{
+    padding: 3% 2%;
+  }
+  .hamburger,.cross{
+    visibility: visible;
   }
 }
