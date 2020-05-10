@@ -1,7 +1,7 @@
+/* eslint-disable no-console */
 import express, { Request , Response } from 'express';
 import socketIo from 'socket.io';
 import NameSpace from './models/namespace';
-import path from 'path';
 const PORT = process.env.PORT||4000;
 const NameSpaces: NameSpace[] = [
   new NameSpace(
@@ -40,7 +40,7 @@ appInstance.on('listening' , () => {
   console.log('Server listening on port: ', PORT);
 });
 
-const getNamespaceList = () => {
+const getNamespaceList = (): Partial<NameSpace>[] => {
   return NameSpaces.map( (namespace: NameSpace) => {
     return {
       name : namespace.name,
@@ -75,6 +75,7 @@ NameSpaces.forEach((ns) => {
             const historyData = ns.history.filter((historyObj) => historyObj.roomName === room);
             io.of(`${ns.name}`)
               .in(`${room}`)
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               .clients( (err: any , clients: string | any[]) => {
                 ackCallback(room, clients.length, ...historyData);
               });

@@ -80,6 +80,7 @@ class LayoutComponent extends Component {
             room: chatHistory.roomName,
             history: chatHistory.history,
           },
+          NSSocket,
         });
         this.toggleSidePanel();
       }
