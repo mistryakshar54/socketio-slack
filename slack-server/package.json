@@ -7,7 +7,6 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --ext .ts",
     "start": "nodemon -x ts-node src/index.ts",
-    "start:slack": "nodemon -x ts-node src/slack.ts",
     "start:debug": "nodemon --inspect src/index.ts"
   },
   "author": "Akshar Mistry",
