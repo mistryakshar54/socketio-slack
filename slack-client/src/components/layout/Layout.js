@@ -2,14 +2,14 @@ import React, { Component } from 'react';
 import io from 'socket.io-client';
 import "./Layout.scss"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPaperPlane, faCircle, faBars, faTimes } from "@fortawesome/free-solid-svg-icons";
+import { faPaperPlane, faCircle, faBars, faTimes, faUser } from "@fortawesome/free-solid-svg-icons";
 import Col from "react-bootstrap/Col";
 import Media from 'react-bootstrap/Media';
-import {SOCKET_URL} from '../../constants';
+import { getSocketUrl, getIconNameFromString } from "../../constants";
 import LoginPanel from '../loginPanel/loginPanel';
 class LayoutComponent extends Component {
   state = {
-    serverUrl: SOCKET_URL,
+    serverUrl: getSocketUrl(),
     namespaceList: [
       {
         name: "",
@@ -50,8 +50,13 @@ class LayoutComponent extends Component {
     }
   };
   joinNamespace = (namespaceName) => {
-    const NSSocket = io.connect(`${this.state.serverUrl + namespaceName}`);
+    let { NSSocket } = this.state;
+    if (NSSocket) {
+      NSSocket.close();
+    }
+    NSSocket = io.connect(`${this.state.serverUrl + namespaceName}`);
     NSSocket.on(`NSMsg`, (msg) => {
+      console.log("On connect msg: " , msg);
       const selectedNS = this.state.namespaceList.filter(
         (ns) => ns.name === namespaceName
       );
@@ -66,14 +71,8 @@ class LayoutComponent extends Component {
     NSSocket = io.connect(`${this.state.serverUrl + currentNS.name}`);
     this.setState({ NSSocket });
     NSSocket.emit(
-      `NSClientMsg`,
-      {
-        type: "joinRoom",
-        message: "Wanna join the room",
-        room: roomName,
-      },
-      (room, currentNoOfUsers, chatHistory) => {
-        console.log("Total users online:", currentNoOfUsers);
+      `NSClientMsg`,roomName,
+      (currentNoOfUsers, chatHistory) => {
         this.setState({
           currentUsersInRoom: currentNoOfUsers,
           currentRoom: {
@@ -125,13 +124,7 @@ class LayoutComponent extends Component {
             const { message, user } = chatMsg;
             return (
               <Media key={index}>
-                <img
-                  width={50}
-                  height={50}
-                  className="mr-3"
-                  src={this.state.serverUrl + "/nsicons/user.png"}
-                  alt={user + "'s profile'"}
-                />
+                <FontAwesomeIcon className="userIcon" icon={faUser} />
                 <Media.Body>
                   <h5>{user}</h5>
                   <p>{message}</p>
@@ -166,7 +159,7 @@ class LayoutComponent extends Component {
 
   toggleSidePanel = () => {
     const { sidePanelOpen } = this.state;
-    this.setState({ sidePanelOpen : !(sidePanelOpen) });
+    this.setState({ sidePanelOpen: !sidePanelOpen });
   };
 
   onChatMsgChange = (event) =>
@@ -200,7 +193,10 @@ class LayoutComponent extends Component {
                         onClick={() => this.joinNamespace(namespace.name)}
                         key={namespace.name + index}
                       >
-                        <img alt="workspace icon" src={this.state.serverUrl + namespace.icon} />
+                        <FontAwesomeIcon
+                          className="nsIcons"
+                          icon={getIconNameFromString(namespace.icon)}
+                        />
                         <span id={namespace.name} className="nsBtn">
                           {namespace.name}
                         </span>

@@ -1,7 +1,8 @@
 import React , {useState} from 'react';
 import Container from "react-bootstrap/Container";
 import './loginPanel.scss';
-import { SOCKET_URL } from '../../constants';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {getIconNameFromString} from '../../constants';
 const LoginPanel = ( props ) => {
     const { namespaceList, login } = props;
     const [name, setName] = useState("");
@@ -27,10 +28,15 @@ const LoginPanel = ( props ) => {
                 return (
                   <div
                     className="nsList"
-                    onClick={() => login(name , namespace.name)}
+                    onClick={() => login(name, namespace.name)}
                     key={namespace.name + index}
                   >
-                    <img src={SOCKET_URL + namespace.icon} />
+                    <FontAwesomeIcon
+                      className="nsIcons"
+                      icon={
+                        getIconNameFromString(namespace.icon) 
+                      }
+                    />
                     <span id={namespace.name} className="nsBtn">
                       {namespace.name}
                     </span>

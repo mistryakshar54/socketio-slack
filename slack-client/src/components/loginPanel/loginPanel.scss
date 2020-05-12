@@ -25,11 +25,12 @@
     padding: 5%;
     cursor: pointer;
 }
-.nsList > img {
+.nsList > .nsIcons {
   height: 30px;
   width: 30px;
-  margin: 0% 15%;
+  margin: 0% 30%;
 }
+
 .nsListContainer{
     display: flex;
     justify-content: space-evenly;

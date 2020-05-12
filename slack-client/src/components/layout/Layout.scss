@@ -125,9 +125,11 @@
   margin: 20%;
   cursor: pointer;
 }
-.nsContent > img {
+.nsContent > .nsIcons {
   height: 30px;
   width: 30px;
+  margin: 0% 30%;
+  color: white;
 }
 .chatContent{
   padding-top: 2%;
@@ -161,6 +163,13 @@
 .hamburger,.cross{
   font-size: 2em;
   visibility: hidden;
+}
+
+.userIcon {
+  height: 35px;
+  width: 35px;
+  margin: 0.5% 1%;
+  font-size: 2em;
 }
 
 @media only screen and (max-width: 600px) {
